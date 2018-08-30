@@ -1,0 +1,61 @@
+{% extends 'layout.twig' %}
+
+{% block body %}
+    <div class="container">
+        <h1 class="title">
+            Discord Watcher 🕵️
+        </h1>
+        <p class="subtitle">
+            Please, fill in your bot's token
+        </p>
+        <form class="field has-addons">
+            <div class="control is-expanded">
+                <input class="input is-large x-token-value" type="text" placeholder="..." value="{{ lastToken }}">
+            </div>
+            <p class="control">
+                <button type="submit" class="button is-primary is-large x-submit-token">
+                    Proceed
+                </button>
+            </p>
+        </form>
+        <section class="hero is-light">
+            <div class="hero-body">
+                <div class="container">
+                    <div class="field">
+                        <label class="label">Warn message</label>
+                        <div class="control">
+                            <input class="input x-warn-message" type="text" placeholder="..." value="{{ warnMessage }}">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Word list</label>
+                        <div class="control">
+                            <div class="select">
+                                <select disabled>
+                                    <option>English default</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const electron = require('electron');
+        const ipcRenderer = electron.ipcRenderer;
+
+        const tokenValue = document.querySelector('.x-token-value');
+        const tokenSubmit = document.querySelector('.x-submit-token');
+        const warnMessage = document.querySelector('.x-warn-message');
+
+        tokenSubmit.addEventListener('click', function () {
+            ipcRenderer.send('tokenSubmit', {
+                token: tokenValue.value,
+                warnMessage: warnMessage.value,
+            });
+        });
+    </script>
+
+{% endblock %}

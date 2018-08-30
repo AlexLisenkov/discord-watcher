@@ -1,0 +1,61 @@
+{% extends 'layout.twig' %}
+
+{% block body %}
+    <div class="container">
+        <h1 class="title">
+            You are about to ban {{ username }}
+        </h1>
+        <p class="subtitle">
+            Please, fill in the following information
+        </p>
+        <div class="field">
+            <label class="label">Days</label>
+            <div class="control">
+                <input class="input x-days" type="number">
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Reason</label>
+            <div class="control">
+                <input class="input x-reason" type="text">
+            </div>
+        </div>
+        <div class="field is-grouped">
+            <div class="control">
+                <button class="button is-success x-submit">Confirm</button>
+            </div>
+            <div class="control">
+                <button class="button is-text x-cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const electron = require('electron');
+        const ipcRenderer = electron.ipcRenderer;
+
+        const cancelBtn = document.querySelector('.x-cancel');
+
+        cancelBtn.addEventListener('click', function () {
+            ipcRenderer.send('closeWindow');
+        });
+
+        const submitBtn = document.querySelector('.x-submit');
+        const days = document.querySelector('.x-days');
+        const reason = document.querySelector('.x-reason');
+
+        submitBtn.addEventListener('click', function () {
+            if( !days.value ){
+                days.classList.add('is-danger');
+                return false;
+            }
+            ipcRenderer.send('confirmBan', {
+                days: days.value,
+                reason: reason.value
+            });
+
+        });
+
+    </script>
+
+{% endblock %}

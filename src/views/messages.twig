@@ -1,0 +1,131 @@
+{% extends 'layout.twig' %}
+
+{% block body %}
+    <div class="container">
+        <div class="x-message-list"></div>
+    </div>
+
+    <script>
+        const electron = require('electron');
+        const ipcRenderer = electron.ipcRenderer;
+
+        const list = document.querySelector('.x-message-list');
+
+        ipcRenderer.send('imHere');
+
+        ipcRenderer.on('message', function (event, message) {
+
+            if( !message.isVulgair ){
+                const html = createNonVulgairMessage(message);
+                list.prepend(html);
+            } else {
+                const html = createVulgairMessage(message);
+                list.prepend(html);
+
+                html.querySelector('.x-delete-message').addEventListener('click', function () {
+                    ipcRenderer.send('deleteMessage', message.message.id);
+                });
+
+                html.querySelector('.x-warn').addEventListener('click', function () {
+                    ipcRenderer.send('warn', message.message.id);
+                });
+
+                html.querySelector('.x-warn-and-delete').addEventListener('click', function () {
+                    ipcRenderer.send('warnAndDelete', message.message.id);
+                });
+
+                html.querySelector('.x-mute').addEventListener('click', function () {
+                    ipcRenderer.send('mute', message.message.id);
+                });
+
+                html.querySelector('.x-kick').addEventListener('click', function () {
+                    ipcRenderer.send('kick', message.message.id);
+                });
+
+                html.querySelector('.x-ban').addEventListener('click', function () {
+                    ipcRenderer.send('ban', message.message.id);
+                });
+            }
+        });
+
+        i = 0;
+
+        function getBackground() {
+            var bg = 'has-background-white-bis';
+
+            if( i % 2 === 0) {
+                bg = 'has-background-white';
+            }
+
+            i++;
+
+            return bg;
+        }
+
+        function createNonVulgairMessage(message) {
+            var element = document.createElement('div');
+            var html = '<div class="columns '+getBackground()+'">';
+            html += '<div class="column is-one-fifth"> </div>';
+            html += '<div class="column">';
+            html += message.message.author.username+'#'+message.message.author.discriminator;
+            html += ': '+message.message.content;
+            html += '</div>';
+            html += '</div>';
+
+            element.innerHTML = html;
+
+            return element;
+        }
+
+        function createVulgairMessage(message) {
+            const background = getBackground();
+            var element = document.createElement('div');
+
+            var html = '<div class="columns '+background+'">';
+
+            html += '<div class="column is-one-fifth tags">';
+            for (var i = 0; i < message.vulgairWords.length; i++){
+                const word = message.vulgairWords[i];
+                html += '<span class="tag is-danger">'+word+'</span>';
+            }
+            html += '</div>';
+
+            html += '<div class="column">';
+            html += message.message.author.username+'#'+message.message.author.discriminator;
+            html += ': '+message.message.content;
+            html += '</div>';
+
+            html += '</div>';
+
+            html += '<div class="columns '+background+'">';
+            html += '<div class="column is-one-fifth"> </div>';
+            html += '<div class="column">';
+            html += '<div class="field is-grouped">';
+            html += '   <div class="control">';
+            html += '       <button class="button is-text x-delete-message">Delete</button>';
+            html += '   </div>';
+            html += '   <div class="control">';
+            html += '       <button class="button is-text x-warn">Warn</button>';
+            html += '   </div>';
+            html += '   <div class="control">';
+            html += '       <button class="button is-text x-warn-and-delete">Warn &amp; Delete</button>';
+            html += '   </div>';
+            html += '   <div class="control">';
+            html += '       <button class="button is-text x-mute">Mute</button>';
+            html += '   </div>';
+            html += '   <div class="control">';
+            html += '       <button class="button is-text x-kick">Kick</button>';
+            html += '   </div>';
+            html += '   <div class="control">';
+            html += '       <button class="button is-text x-ban">Ban</button>';
+            html += '   </div>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+
+            element.innerHTML = html;
+
+            return element;
+        }
+    </script>
+{% endblock %}
